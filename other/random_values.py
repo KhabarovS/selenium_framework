@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from random import randint
 from string import ascii_lowercase, digits
+from typing import Optional
 
 from allure import step
 from mimesis.random import Random
@@ -11,7 +12,7 @@ msg = 'ГЕНЕРАТОР {gen}.\nРЕЗУЛЬТАТ: {result}'
 
 
 @step('Генератор. Получить случайное число')
-def get_random_number(start: int = 1, end: int = 999999, length: int = None) -> int:
+def get_random_number(start: int = 1, end: int = 999999, length: Optional[int] = None) -> int:
     """ Получить случайное число в заданном диапазоне или заданной длины
 
     Args:
@@ -26,9 +27,16 @@ def get_random_number(start: int = 1, end: int = 999999, length: int = None) -> 
 
 
 @step('Генератор. Получить случайную строку')
-def get_random_string():
-    """ Получить случайную строку """
-    result = Random()._generate_string(str_seq=f'абвгдеёжзийклмнопрстуфхцчшщьыъэюя{ascii_lowercase}{digits}')
+def get_random_string(length: int):
+    """ Получить случайную строку
+
+    Args:
+        length: длина строки
+    """
+    result = Random()._generate_string(
+        str_seq=f'абвгдеёжзийклмнопрстуфхцчшщьыъэюя{ascii_lowercase}{digits}',
+        length=length
+    )
     logger.info(msg.format(gen='cлучайной строки', result=result))
 
     return result
