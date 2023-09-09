@@ -39,8 +39,7 @@ def pytest_addoption(parser: pytest.Parser):
 def pytest_configure(config: pytest.Config):
     """Положить параметры запуска в окружение
 
-    Args:
-        config: Инстанс Config для доступа к значениям конфигурации, менеджеру плагинов и хукам плагинов
+    Args:        config: Config для доступа к значениям конфигурации, менеджеру плагинов и хукам плагинов
     """
     Config.log_level = config.getoption('--log_level')
     create_logger(log_level=Config.log_level)
