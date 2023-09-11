@@ -18,18 +18,12 @@ def open_page(request: SubRequest, driver: WebDriver):
         driver: экземпляр вебдрайвера.
     """
     if not (param := getattr(request, 'param', None)):
-        logger.error(msg := f'В фикстуру не переданы обязательные параметры через indirect: user, page')
+        logger.error(msg := f'В фикстуру не переданы обязательные параметры через indirect: page')
         raise RuntimeError(msg)
 
-    if len(param) != 2 or not isinstance(param, Iterable):
-        logger.error(msg := 'В фикстуру передано неверное количество параметров через indirect: user, page')
-        raise RuntimeError(msg)
-
-    user, page = param
-
-    with step(msg := f'Открыть страницу {page}'):
+    with step(msg := f'Открыть страницу {param}'):
         logger.info(msg)
-        page = page(driver=driver)
+        page = param(driver=driver)
         page.get()
 
     yield page
