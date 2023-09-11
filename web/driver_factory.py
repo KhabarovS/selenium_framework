@@ -18,7 +18,7 @@ class Driver:
             root: Path,
             add_opts: Optional[list] = None,
             is_selenoid: Optional[bool] = None
-    ) -> Optional[Remote, Chrome]:
+    ) -> Union[Remote, Chrome]:
         """Создать экземпляр Chrome драйвера
 
         Args:

@@ -35,11 +35,25 @@ def pytest_addoption(parser: pytest.Parser):
         help="Укажите параметр, если хотите запустить браузер через Selenoid"
     )
 
+    parser.addoption(
+        "--log_level",
+        action='store',
+        default='INFO',
+        help='Уровень логгирования',
+        choices=['DEBUG', 'INFO', 'SUCCESS', 'WARNING', 'ERROR', 'CRITICAL']
+    )
+
+    parser.addoption(
+        "--web_url",
+        action='store',
+        help='Базовый URL WEB-страниц'
+    )
+
 
 def pytest_configure(config: pytest.Config):
     """Положить параметры запуска в окружение
 
-    Args:        config: Config для доступа к значениям конфигурации, менеджеру плагинов и хукам плагинов
+    Args: config: Config для доступа к значениям конфигурации, менеджеру плагинов и хукам плагинов
     """
     Config.log_level = config.getoption('--log_level')
     create_logger(log_level=Config.log_level)

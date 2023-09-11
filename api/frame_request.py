@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 from requests import Response, request
@@ -25,9 +25,9 @@ class Request:
             url: str,
             method: MethodEnum,
             headers: Optional[dict[str, str]] = None,
-            data: Optional[dict, list, str] = None,
+            data: Optional[Union[dict, list, str]] = None,
             params: Optional[dict[str, str]] = None,
-            timeout: Optional[int, float] = None,
+            timeout: Optional[Union[int, float]] = None,
             json: Optional[dict] = None
     ) -> Response:
         """Отправить запрос и залогировать запрос и ответ
