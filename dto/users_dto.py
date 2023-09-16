@@ -48,4 +48,4 @@ class UpdateUserDto(RequestUserDto):
 
 class CreateUserDto(UpdateUserDto):
     """ Схема ответа создания пользователя """
-    id_: StrictInt = Field(alias='id')
+    id_: StrictStr = Field(alias='id')
