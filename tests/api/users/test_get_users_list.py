@@ -13,7 +13,7 @@ class TestGetUsersList(AllureApiUsers):
 
     @title('Получить список пользователей с валидными параметрами')
     @mark.parametrize('page', ['1', '2'])
-    def test_get_users_list(self, page):
+    def test_get_users_list(self, page: str):
         (response := ReqresUsers().get_users(params={'page': page})).raise_for_status()
         model.is_valid(model=UsersListResponseDto, response=response.json())
 
@@ -26,6 +26,6 @@ class TestGetUsersList(AllureApiUsers):
         ]
     )
     @mark.xfail(reason='Баг')
-    def test_get_users_list_negative(self, page):
+    def test_get_users_list_negative(self, page: str):
         response = ReqresUsers().get_users(params={'page': page})
         assert 400 == response.status_code, ERROR_STATUS_MSG.format(code=400, fact_code=response.status_code)

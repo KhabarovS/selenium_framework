@@ -43,9 +43,10 @@ class RequestUserDto(ReqresDto):
 
 class UpdateUserDto(RequestUserDto):
     """ Схема ответа обновления пользователя """
-    createdAt: datetime
+    updatedAt: datetime
 
 
-class CreateUserDto(UpdateUserDto):
+class CreateUserDto(RequestUserDto):
     """ Схема ответа создания пользователя """
+    createdAt: datetime
     id_: StrictStr = Field(alias='id')

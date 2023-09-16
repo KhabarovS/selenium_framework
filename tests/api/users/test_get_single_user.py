@@ -13,13 +13,13 @@ class TestGetSingleUser(AllureApiUsers):
 
     @title('Получить  пользователя с валидными параметрами')
     @mark.parametrize('user_id', [1, 2])
-    def test_get_single_user(self, user_id):
+    def test_get_single_user(self, user_id: int):
         (response := ReqresUsers().get_single_user(user_id=user_id)).raise_for_status()
         model.is_valid(model=UserResponseDto, response=response.json())
 
     @title('Получить  пользователя с валидными параметрами NOT FOUND')
     @mark.parametrize('user_id', [23, 55])
-    def test_get__user_not_found(self, user_id):
+    def test_get__user_not_found(self, user_id: int):
         response = ReqresUsers().get_single_user(user_id=user_id)
         assert 404 == response.status_code, ERROR_STATUS_MSG.format(code=404, fact_code=response.status_code)
         assert '{}' == response.text, f'Тело ответа "{response.text}" не соответствует ожидаемому {{}}'
@@ -33,6 +33,6 @@ class TestGetSingleUser(AllureApiUsers):
         ]
     )
     @mark.xfail(reason='Баг')
-    def test_get_users_list_negative(self, user_id):
+    def test_get_users_list_negative(self, user_id: int):
         response = ReqresUsers().get_single_user(user_id=user_id)
         assert 400 == response.status_code, ERROR_STATUS_MSG.format(code=400, fact_code=response.status_code)
