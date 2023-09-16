@@ -1,6 +1,6 @@
 """Методы валидации тел ответа по схеме Pydantic"""
 import json
-from typing import Any
+from typing import Type
 
 from allure import attach, step
 from pydantic import BaseModel, ValidationError
@@ -11,7 +11,7 @@ from other.logging import logger
 
 @logger.catch
 @step('Валидация тела ответа по схеме')
-def is_valid(model: BaseModel, response: Any) -> bool:
+def is_valid(model: Type[BaseModel], response: dict) -> bool:
     """Валидировать тело ответа по схеме
 
     Args:
@@ -21,7 +21,7 @@ def is_valid(model: BaseModel, response: Any) -> bool:
     with step('Проверка тела по схеме'):
         _model, _response = model.model_json_schema(), json.dumps(response)
         attach(_response, name='Тело ответа')
-        attach(_model, name='Модель')
+        attach(str(_model), name='Модель')
 
         try:
             model.model_validate(response)
