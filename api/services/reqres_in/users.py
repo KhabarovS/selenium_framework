@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from requests import Response
 
@@ -13,7 +13,7 @@ class ReqresUsers(ReqresIn):
         super().__init__()
         self.url = f'{self.url}/users'
 
-    def get_users(self, params: dict[str, str]) -> Response:
+    def get_users(self, params: dict[str, Any]) -> Response:
         """ Получить информацию о пользователях
 
         Args:
