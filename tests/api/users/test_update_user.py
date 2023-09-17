@@ -29,7 +29,7 @@ class TestUpdateUser(AllureApiUsers):
     @title('Обновить пользователя')
     def test_put_user(self, fixture_create_user: CreateUserDto):
         response = ReqresUsers().update_user(
-            method=MethodEnum.PATCH,
+            method=MethodEnum.PUT,
             user_id=fixture_create_user.id_,
             json={'name': get_random_name(), 'job': get_random_job()}
         )

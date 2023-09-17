@@ -23,8 +23,8 @@ class SupportDto(ReqresDto):
 
 class UserResponseDto(ReqresDto):
     """ Схема ответа одиночного пользователя """
-    data: UsersDto
-    support: SupportDto
+    data: Optional[UsersDto] = None
+    support: Optional[SupportDto] = None
 
 
 class UsersListResponseDto(ReqresDto):

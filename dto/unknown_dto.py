@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import Field, StrictInt, StrictStr
 
 from dto.generic import ReqresDto
@@ -15,8 +17,8 @@ class ResourceDto(ReqresDto):
 
 class ResourceSingleResponseDto(ReqresDto):
     """ Схема ответа с одиночным объектом ресурса """
-    data: ResourceDto
-    support: SupportDto
+    data: Optional[ResourceDto] = None
+    support: Optional[SupportDto] = None
 
 
 class ResourceListResponseDto(ReqresDto):

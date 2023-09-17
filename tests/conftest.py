@@ -1,14 +1,17 @@
+from typing import Type
+
 from _pytest.fixtures import SubRequest
 from allure import step, title
 from pytest import fixture
 from selenium.webdriver.remote.webdriver import WebDriver
 
 from other.logging import logger
+from web.pages.base_page import BasePage
 
 
 @fixture(scope='session')
 @title('Открыть страницу')
-def open_page(request: SubRequest, driver: WebDriver) -> WebDriver:
+def open_page(request: SubRequest, driver: WebDriver) -> Type[BasePage]:
     """Открыть вебдрайвер и страницу.
 
     Args:

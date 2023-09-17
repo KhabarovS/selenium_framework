@@ -28,3 +28,10 @@ class AllureApiRegister:
 class AllureApiLogin:
     """ Разметка сервиса Login """
     ...
+
+
+@epic('UI')
+@mark.web
+class AllureWebUi:
+    """ Разметка сервиса UI """
+    ...
