@@ -1,11 +1,11 @@
 from typing import Optional
 
-from pydantic import StrictStr, Field
+from pydantic import Field, StrictStr
 
-from api.services.reqres_in.reqres_in import ReqresIn
+from dto.generic import ReqresDto
 
 
-class LoginResponse(ReqresIn):
+class LoginResponse(ReqresDto):
     """ Схема авторизации пользователя """
-    token: Optional[StrictStr] = Field(...)
-    error: Optional[StrictStr] = Field(...)
+    token: Optional[StrictStr] = Field(None)
+    error: Optional[StrictStr] = Field(None)

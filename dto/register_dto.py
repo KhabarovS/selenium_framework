@@ -1,12 +1,12 @@
 from typing import Optional
 
-from pydantic import StrictInt, Field, StrictStr
+from pydantic import Field, StrictInt, StrictStr
 
-from api.services.reqres_in.reqres_in import ReqresIn
+from dto.generic import ReqresDto
 
 
-class RegisterResponse(ReqresIn):
+class RegisterResponse(ReqresDto):
     """ Схема регистрации пользователя """
-    id_: Optional[StrictInt] = Field(..., by_alias='id')
-    token: Optional[StrictStr] = Field(...)
-    error: Optional[StrictStr] = Field(...)
+    id_: Optional[StrictInt] = Field(None, by_alias='id', validation_alias='id')
+    token: Optional[StrictStr] = None
+    error: Optional[StrictStr] = None

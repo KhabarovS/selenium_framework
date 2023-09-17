@@ -1,11 +1,11 @@
-from pytest import mark
 from allure import feature, title
+from pytest import mark
 
 from api.frame_request import MethodEnum
 from api.services.reqres_in.users import ReqresUsers
-from dto.users_dto import UpdateUserDto, CreateUserDto
+from dto.users_dto import CreateUserDto, UpdateUserDto
 from other import model
-from other.random_values import get_random_name, get_random_job
+from other.random_values import get_random_job, get_random_name
 from tests.allure_constants import AllureApiUsers
 from tests.constants import ERROR_STATUS_MSG
 

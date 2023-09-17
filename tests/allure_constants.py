@@ -7,3 +7,24 @@ from pytest import mark
 class AllureApiUsers:
     """ Разметка сервиса Users """
     ...
+
+
+@epic('Resource')
+@mark.api
+class AllureApiResource:
+    """ Разметка сервиса Resource """
+    ...
+
+
+@epic('Register')
+@mark.api
+class AllureApiRegister:
+    """ Разметка сервиса Register """
+    ...
+
+
+@epic('Login')
+@mark.api
+class AllureApiLogin:
+    """ Разметка сервиса Login """
+    ...

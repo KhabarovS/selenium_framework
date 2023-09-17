@@ -11,13 +11,13 @@ from tests.constants import ERROR_STATUS_MSG
 @feature('Проверить метод получения пользователей GET /api/users/{user_id}')
 class TestGetSingleUser(AllureApiUsers):
 
-    @title('Получить  пользователя с валидными параметрами')
+    @title('Получить пользователя с валидными параметрами')
     @mark.parametrize('user_id', [1, 2])
     def test_get_single_user(self, user_id: int):
         (response := ReqresUsers().get_single_user(user_id=user_id)).raise_for_status()
         model.is_valid(model=UserResponseDto, response=response.json())
 
-    @title('Получить  пользователя с валидными параметрами NOT FOUND')
+    @title('Получить пользователя с валидными параметрами NOT FOUND')
     @mark.parametrize('user_id', [23, 55])
     def test_get__user_not_found(self, user_id: int):
         response = ReqresUsers().get_single_user(user_id=user_id)

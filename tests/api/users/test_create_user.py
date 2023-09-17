@@ -4,7 +4,7 @@ from pytest import mark, param
 from api.services.reqres_in.users import ReqresUsers
 from dto.users_dto import CreateUserDto
 from other import model
-from other.random_values import get_random_name, get_random_job
+from other.random_values import get_random_job, get_random_name
 from tests.allure_constants import AllureApiUsers
 from tests.constants import ERROR_STATUS_MSG
 

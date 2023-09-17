@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import StrictInt, EmailStr, StrictStr, Field
+from pydantic import EmailStr, Field, StrictInt, StrictStr
 
 from dto.generic import ReqresDto
 

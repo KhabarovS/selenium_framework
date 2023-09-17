@@ -1,4 +1,4 @@
-from allure import title, feature
+from allure import feature, title
 from pytest import mark, param
 
 from api.services.reqres_in.users import ReqresUsers
@@ -12,9 +12,15 @@ from tests.constants import ERROR_STATUS_MSG
 class TestGetUsersList(AllureApiUsers):
 
     @title('Получить список пользователей с валидными параметрами')
-    @mark.parametrize('page', ['1', '2'])
-    def test_get_users_list(self, page: str):
+    @mark.parametrize('page', [1, 2])
+    def test_get_users_list(self, page: int):
         (response := ReqresUsers().get_users(params={'page': page})).raise_for_status()
+        model.is_valid(model=UsersListResponseDto, response=response.json())
+
+    @title('Получить список пользователей с ожиданием')
+    @mark.parametrize('delay', [1, 2, 3])
+    def test_get_user_list_with_delay(self, delay: int):
+        (response := ReqresUsers().get_users(params={'delay': delay})).raise_for_status()
         model.is_valid(model=UsersListResponseDto, response=response.json())
 
     @title('[-] Получить список с невалидными параметрами')

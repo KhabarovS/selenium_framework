@@ -6,6 +6,7 @@ class ReqresDto(BaseModel):
 
     class Config:
         use_enum_values = True
+        populate_by_name = True
 
     def model_dump(self, *args, **kwargs):
         """ Перегрузка метода .dict с аргументами по умолчанию """
