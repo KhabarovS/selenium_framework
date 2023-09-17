@@ -7,6 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from other.config import Config
 from other.logging import logger
+from web import driver_config
 from web.locator import Locator, format_locator
 
 
@@ -52,7 +53,7 @@ class BasePage:
 
     @format_locator
     @step('Найти элемент по локатору')
-    def find_element_by_locator(self, locator: Locator, timeout: float) -> WebElement:
+    def find_element_by_locator(self, locator: Locator, timeout: float = driver_config.TIMEOUT, **kwargs) -> WebElement:
         """Ожидать присутствие элемента на странице
 
         Args:
@@ -77,7 +78,7 @@ class BasePage:
 
     @format_locator
     @step('Найти элементы на странице по локатору')
-    def find_elements_by_locator(self, locator: Locator) -> list[WebElement]:
+    def find_elements_by_locator(self, locator: Locator, **kwargs) -> list[WebElement]:
         """Найти список элементов на странице
 
         Args:
@@ -91,7 +92,12 @@ class BasePage:
 
     @format_locator
     @step('Найти кликабельный элемент на странице')
-    def find_clickable_element_by_locator(self, locator: Locator, timeout: float) -> WebElement:
+    def find_clickable_element_by_locator(
+            self,
+            locator: Locator,
+            timeout: float = driver_config.TIMEOUT,
+            **kwargs
+    ) -> WebElement:
         """Ожидание кликабельности элемента
 
         Args:
@@ -115,9 +121,39 @@ class BasePage:
             raise e
 
     @format_locator
-    @step('Скролл страницы до элемента')
-    def scroll_into_view_by_locator(self, locator: Locator, timeout: float) -> WebElement:
+    @step('Ожидать видимость элемента')
+    def find_visible_element(self, locator: Locator, timeout: float = driver_config.TIMEOUT, **kwargs) -> WebElement:
+        """Ожидать присутствия элемента в DOM страницы и его видимости.
+
+        Args:
+            locator: Инстанс Locator.
+            timeout: Количество секунд до тайм-аута ожидания.
+            **kwargs: Аргументы для форматирования локатора
         """
+        try:
+            logger.info(f'Ожидаем видимый {locator} в течение {timeout} секунд')
+            element = WebDriverWait(driver=self._driver, timeout=timeout).until(
+                method=EC.visibility_of_element_located(locator=locator.locator)
+            )
+            logger.success('Элемент найден и виден!')
+
+            return element
+
+        except TimeoutException as e:
+            logger.error(msg := f'Не удалось найти видимый {locator} в течение {timeout} секунд')
+            e.msg += f'\n{msg}'
+
+            raise e
+
+    @format_locator
+    @step('Скролл страницы до элемента')
+    def scroll_into_view_by_locator(
+            self,
+            locator: Locator,
+            timeout: float = driver_config.TIMEOUT,
+            **kwargs
+    ) -> WebElement:
+        """Проскролить страницу до элемента
 
         Args:
             locator: локатор
@@ -132,7 +168,7 @@ class BasePage:
 
     @format_locator
     @step('Кликнуть по элементу')
-    def click_by_locator(self, locator: Locator, timeout: float) -> WebElement:
+    def click_by_locator(self, locator: Locator, timeout: float = driver_config.TIMEOUT, **kwargs) -> WebElement:
         """Найти элемент и кликнуть по нему
 
         Args:
@@ -157,7 +193,13 @@ class BasePage:
 
     @format_locator
     @step('Ввести значение в элемент по локатору')
-    def send_keys_by_locator(self, locator: Locator, keys: str, timeout: float) -> WebElement:
+    def send_keys_by_locator(
+            self,
+            locator: Locator,
+            keys: str,
+            timeout: float = driver_config.TIMEOUT,
+            **kwargs
+    ) -> WebElement:
         """Найти элемент по локатору и ввести в него значение
 
         Args:
@@ -181,7 +223,7 @@ class BasePage:
 
     @format_locator
     @step('Очистить поле по локатору')
-    def clear_by_locator(self, locator: Locator, timeout: float) -> WebElement:
+    def clear_by_locator(self, locator: Locator, timeout: float = driver_config.TIMEOUT, **kwargs) -> WebElement:
         """Очистить поле для ввода
 
         Args:
