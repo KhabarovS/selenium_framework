@@ -1,10 +1,12 @@
 from enum import StrEnum
-from typing import Optional, Union
+from typing import Type, Any
 
-import requests
-from requests import Response, request
+from pydantic import BaseModel
+from requests import request, Request as src_Request
 
+from api.custom_response import CustomResponse
 from other.logging import log_request, log_response
+from other.model import convert_model
 
 
 class MethodEnum(StrEnum):
@@ -24,12 +26,15 @@ class Request:
             self,
             url: str,
             method: MethodEnum,
-            headers: Optional[dict[str, str]] = None,
-            data: Optional[Union[dict, list, str]] = None,
-            params: Optional[dict[str, str]] = None,
-            timeout: Optional[Union[int, float]] = None,
-            json: Optional[dict] = None
-    ) -> Response:
+            headers: dict[str, Any] | None = None,
+            data: dict | list | str | bytes | BaseModel | None = None,
+            params: dict[str, Any] | None = None,
+            timeout: int | float | None = None,
+            json: dict | list | BaseModel | None = None,
+            request_model: Type[BaseModel] | None = None,
+            response_model: Type[BaseModel] | None = None,
+            **kwargs,
+    ) -> CustomResponse:
         """Отправить запрос и залогировать запрос и ответ
 
         Args:
@@ -40,9 +45,18 @@ class Request:
             json: тело запроса в формате dict
             params: параметры запроса, если есть
             timeout: таймаут, который надо выждать прежде чем отправить запрос
+            request_model: Схема запроса
+            response_model: Схема ответа
+            **kwargs: кварги для метода преобразования объекта модели
         """
+        if isinstance(data := data if data else self.data, BaseModel):
+            data = convert_model(model=data, is_json=True, **kwargs)
+
+        if isinstance(json := json if json else self.json, BaseModel):
+            json = convert_model(model=json, **kwargs)
+
         log_request(
-            request=requests.Request(
+            request=src_Request(
                 url=url,
                 method=f'{method}',
                 headers=headers if headers else self.headers,
@@ -64,4 +78,4 @@ class Request:
         )
         log_response(response=response)
 
-        return response
+        return CustomResponse(response=response, request_model=request_model, response_model=response_model)

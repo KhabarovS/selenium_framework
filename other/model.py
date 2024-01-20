@@ -48,3 +48,29 @@ def is_valid(model: Type[BaseModel], response: dict):
                 f'\nТело:   {_response}'
             )
             fail(reason=str(e))
+
+
+def convert_model(model: BaseModel, is_json: bool = False, **kwargs) -> list | dict | str:
+    """Преобразование модели в объект для отправки в request: str, dict, list
+
+    Args:
+        model: объект модели;
+        is_json:    True - результат возвращается в формате json;
+                    False - результат возвращается в dict/list
+        **kwargs: кварги для метода преобразования
+    """
+    result = model.model_dump_json(**kwargs) if is_json else model.model_dump(**kwargs)
+
+    if '__root__' in result:
+        result = result['__root__']
+
+    is_list = True if isinstance(result, list) else False
+
+    logger.debug(
+        'Преобразование модели: \n'
+        f'\tМодель: {model}\n'
+        f'\tПреобразование: {"json" if is_json else "list" if is_list else "dict"}\n'
+        f'\tРезультат: {result}'
+    )
+
+    return result
