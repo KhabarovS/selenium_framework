@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 from typing import Optional, Union
 
 import requests
@@ -7,8 +7,8 @@ from requests import Response, request
 from other.logging import log_request, log_response
 
 
-class MethodEnum(Enum):
-    """ Перечисление доступных методов запроса"""
+class MethodEnum(StrEnum):
+    """Перечисление доступных методов запроса"""
     GET = 'GET'
     POST = 'POST'
     PATCH = 'PATCH'
@@ -44,7 +44,7 @@ class Request:
         log_request(
             request=requests.Request(
                 url=url,
-                method=method.value,
+                method=f'{method}',
                 headers=headers if headers else self.headers,
                 params=params if params else self.params,
                 data=data if data else self.data,
@@ -54,7 +54,7 @@ class Request:
 
         response = request(
             url=url,
-            method=method.value,
+            method=f'{method}',
             headers=headers if headers else self.headers,
             params=params if params else self.params,
             data=data if data else self.data,
