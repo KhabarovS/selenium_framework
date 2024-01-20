@@ -1,4 +1,4 @@
-from api.frame_request import Request
+from api.custom_request import Request
 from other.config import Config
 
 

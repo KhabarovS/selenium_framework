@@ -2,7 +2,7 @@ from typing import Optional
 
 from requests import Response
 
-from api.frame_request import MethodEnum
+from api.custom_request import MethodEnum
 from api.services.reqres_in.reqres_in import ReqresIn
 
 
