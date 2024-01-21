@@ -2,10 +2,7 @@ from allure import feature, title
 from pytest import mark, param
 
 from api.services.reqres_in.users import ReqresUsers
-from dto.users_dto import UsersListResponseDto
-from other import model
 from tests.allure_constants import AllureApiUsers
-from tests.constants import ERROR_STATUS_MSG
 
 
 @feature('Проверить метод получения списка пользователей GET /api/users')
@@ -14,14 +11,18 @@ class TestGetUsersList(AllureApiUsers):
     @title('Получить список пользователей с валидными параметрами')
     @mark.parametrize('page', [1, 2])
     def test_get_users_list(self, page: int):
-        (response := ReqresUsers().get_users(params={'page': page})).raise_for_status()
-        model.is_valid(model=UsersListResponseDto, response=response.json())
+        response = ReqresUsers().get_users(params={'page': page})
+
+        response.raise_for_status()
+        response.check_is_valid()
 
     @title('Получить список пользователей с ожиданием')
     @mark.parametrize('delay', [1, 2, 3])
     def test_get_user_list_with_delay(self, delay: int):
-        (response := ReqresUsers().get_users(params={'delay': delay})).raise_for_status()
-        model.is_valid(model=UsersListResponseDto, response=response.json())
+        response = ReqresUsers().get_users(params={'delay': delay})
+
+        response.raise_for_status()
+        response.check_is_valid()
 
     @title('[-] Получить список с невалидными параметрами')
     @mark.parametrize(
@@ -34,4 +35,5 @@ class TestGetUsersList(AllureApiUsers):
     @mark.xfail(reason='Баг')
     def test_get_users_list_negative(self, page: str):
         response = ReqresUsers().get_users(params={'page': page})
-        assert 400 == response.status_code, ERROR_STATUS_MSG.format(code=400, fact_code=response.status_code)
+
+        response.check_expected_status_code(expected_code=400)

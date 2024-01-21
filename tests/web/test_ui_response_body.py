@@ -4,7 +4,7 @@ from allure import dynamic, feature, step
 from pydantic import BaseModel
 from pytest import mark
 
-from api.frame_request import MethodEnum
+from api.custom_request import MethodEnum
 from api.services.reqres_in.login import ReqresLogin
 from api.services.reqres_in.register import ReqresRegister
 from api.services.reqres_in.unknown import ReqresUnknown
@@ -17,7 +17,7 @@ from tests.allure_constants import AllureWebUi
 from tests.api.conftest import get_request_to_reqres
 from web.pages.reqres_in.main_page import MainPage, RequestEnum
 
-test_data = [
+TEST_DATA = [
     (
         (ReqresUsers().get_users, {'params': {'page': 2}}, UsersListResponseDto),
         RequestEnum.LIST_USERS,
@@ -115,7 +115,7 @@ class TestUIResponseBody(AllureWebUi):
     MSG_BODY = 'Тело ответа UI "{ui_body}" не равен телу ответа с API "{api_body}"'
 
     @mark.parametrize('open_page', [MainPage], indirect=True)
-    @mark.parametrize('get_request_to_reqres, name_request, model', test_data, indirect=['get_request_to_reqres'])
+    @mark.parametrize('get_request_to_reqres, name_request, model', TEST_DATA, indirect=['get_request_to_reqres'])
     def test_ui_response_body(
             self,
             open_page: MainPage,

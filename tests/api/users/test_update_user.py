@@ -1,13 +1,13 @@
-from allure import feature, title
-from pytest import mark
+from typing import Annotated
 
-from api.frame_request import MethodEnum
+from allure import feature, title
+from pytest import mark, fixture
+
+from api.custom_request import MethodEnum
 from api.services.reqres_in.users import ReqresUsers
-from dto.users_dto import CreateUserDto, UpdateUserDto
-from other import model
+from dto.users_dto import CreateUserDto
 from other.random_values import get_random_job, get_random_name
 from tests.allure_constants import AllureApiUsers
-from tests.constants import ERROR_STATUS_MSG
 
 
 @feature('Обновить пользователя PATCH/PUT /api/users')
@@ -16,22 +16,23 @@ class TestUpdateUser(AllureApiUsers):
     @title('Частично обновить пользователя')
     @mark.bug
     @mark.xfail
-    def test_patch_user(self, fixture_create_user: CreateUserDto):
+    def test_patch_user(self, fixture_create_user: Annotated[CreateUserDto, fixture]):
         response = ReqresUsers().update_user(
             method=MethodEnum.PATCH,
             user_id=fixture_create_user.id_,
             json={'name': get_random_name()}
         )
 
-        assert 200 == response.status_code, ERROR_STATUS_MSG.format(code=200, fact_code=response.status_code)
-        model.is_valid(model=UpdateUserDto, response=response.json())
+        response.check_expected_status_code(expected_code=200)
+        response.check_is_valid()
 
     @title('Обновить пользователя')
-    def test_put_user(self, fixture_create_user: CreateUserDto):
+    def test_put_user(self, fixture_create_user: Annotated[CreateUserDto, fixture]):
         response = ReqresUsers().update_user(
             method=MethodEnum.PUT,
             user_id=fixture_create_user.id_,
             json={'name': get_random_name(), 'job': get_random_job()}
         )
-        assert 200 == response.status_code, ERROR_STATUS_MSG.format(code=200, fact_code=response.status_code)
-        model.is_valid(model=UpdateUserDto, response=response.json())
+
+        response.check_expected_status_code(expected_code=200)
+        response.check_is_valid()

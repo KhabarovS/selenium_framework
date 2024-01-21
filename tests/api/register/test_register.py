@@ -2,11 +2,9 @@ from allure import feature, title
 from pytest import mark, param
 
 from api.services.reqres_in.register import ReqresRegister
-from dto.register_dto import RegisterResponse
-from other import model
+
 from other.random_values import get_random_email, get_random_string
 from tests.allure_constants import AllureApiRegister
-from tests.constants import ERROR_STATUS_MSG
 
 
 @feature('Проверить метод регистрации пользователя')
@@ -20,11 +18,10 @@ class TestRegister(AllureApiRegister):
         ]
     )
     def test_register_user(self, email: str, password: str):
-        (
-            response := ReqresRegister().post_register(json={'email': email, 'password': password})
-        ).raise_for_status()
+        response = ReqresRegister().post_register(json={'email': email, 'password': password})
 
-        model.is_valid(model=RegisterResponse, response=response.json())
+        response.raise_for_status()
+        response.check_is_valid()
 
     @title('[-] Регистрация пользователя с невалидными данными')
     @mark.parametrize(
@@ -37,6 +34,7 @@ class TestRegister(AllureApiRegister):
     def test_register_unsuccessful_user(self, json: dict, msg: str):
         response = ReqresRegister().post_register(json=json)
 
-        assert 400 == response.status_code, ERROR_STATUS_MSG.format(code=400, fact_code=response.status_code)
-        model.is_valid(model=RegisterResponse, response=(content := response.json()))
-        assert msg == content['error']
+        response.check_expected_status_code(expected_code=400)
+        response.check_is_valid()
+
+        assert msg == response.json()['error']
