@@ -1,26 +1,12 @@
 """Методы валидации тел ответа по схеме Pydantic"""
 from json import dumps
-from typing import Type, TypeVar, Generic
+from typing import Type
 
 from allure import attach, step
 from pydantic import BaseModel, ValidationError
 from pytest import fail
 
 from other.logging import logger
-
-Model = TypeVar('Model', bound=BaseModel)
-
-
-class GenericModelList(Generic[Model], BaseModel):
-    """Универсальный класс дженерик с корневым типом список
-
-    Examples:
-        my_list_model = GenericModelList[MyModel].model_validate(my_list) - преобразование в модель списка словарей
-        my_list_model = GenericModelList[MyModel].model_validate_json(my_json) - преобразование в модель строки формата json
-        model.is_valid(GenericModelList[MyModel], DATA) - валидация списка словарей на соответствие модели
-
-    """
-    __root__: list[Model]
 
 
 @logger.catch
