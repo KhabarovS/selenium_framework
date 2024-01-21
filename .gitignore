@@ -15,4 +15,4 @@ __pycache__
 report
 /web/drivers
 allure/
-*/allure_reports
+/allure_reports/
