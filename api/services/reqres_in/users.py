@@ -1,8 +1,7 @@
-from typing import Any, Optional
-
-from requests import Response
+from typing import Any
 
 from api.custom_request import MethodEnum
+from api.custom_response import CustomResponse
 from api.services.reqres_in.reqres_in import ReqresIn
 
 
@@ -13,7 +12,7 @@ class ReqresUsers(ReqresIn):
         super().__init__()
         self.url = f'{self.url}/users'
 
-    def get_users(self, params: dict[str, Any]) -> Response:
+    def get_users(self, params: dict[str, Any]) -> CustomResponse:
         """ Получить информацию о пользователях
 
         Args:
@@ -23,7 +22,7 @@ class ReqresUsers(ReqresIn):
         """
         return self.request(method=MethodEnum.GET, url=self.url, params=params)
 
-    def get_single_user(self, user_id: int) -> Response:
+    def get_single_user(self, user_id: int) -> CustomResponse:
         """ Получить информацию о пользователе
 
         Args:
@@ -31,7 +30,7 @@ class ReqresUsers(ReqresIn):
         """
         return self.request(method=MethodEnum.GET, url=f'{self.url}/{user_id}')
 
-    def create_user(self, data: Optional[str] = None, json: Optional[dict] = None) -> Response:
+    def create_user(self, data: str | None = None, json: dict | None = None) -> CustomResponse:
         """Создать пользователя
 
         Args:
@@ -42,7 +41,13 @@ class ReqresUsers(ReqresIn):
         """
         return self.request(method=MethodEnum.POST, url=self.url, data=data, json=json)
 
-    def update_user(self, method: MethodEnum, user_id: int, data: Optional[str] = None, json: Optional[dict] = None):
+    def update_user(
+            self,
+            method: MethodEnum,
+            user_id: int,
+            data: str | None = None,
+            json: dict | None = None,
+    ) -> CustomResponse:
         """Обновить пользователя
 
         Args:
@@ -55,7 +60,7 @@ class ReqresUsers(ReqresIn):
         """
         return self.request(method=method, url=f'{self.url}/{user_id}', data=data, json=json)
 
-    def delete_user(self, user_id: int):
+    def delete_user(self, user_id: int) -> CustomResponse:
         """Удалить пользователя
 
         Args:

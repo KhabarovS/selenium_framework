@@ -2,7 +2,6 @@ from allure import feature, title
 from pytest import mark
 
 from api.services.reqres_in.login import ReqresLogin
-from dto.login_dto import LoginResponse
 from dto.register_dto import RegisterResponse
 from other import model
 from other.random_values import get_random_email, get_random_string
@@ -15,11 +14,10 @@ class TestLoginUser(AllureApiLogin):
 
     @title('Логин пользователя с валидными данными')
     def test_login_user(self):
-        (
-            response := ReqresLogin().post_login(json={'email': 'eve.holt@reqres.in', 'password': 'cityslicka'})
-        ).raise_for_status()
+        response_obj = ReqresLogin().post_login(json={'email': 'eve.holt@reqres.in', 'password': 'cityslicka'})
 
-        model.is_valid(model=LoginResponse, response=response.json())
+        response_obj.raise_for_status()
+        response_obj.check_is_valid()
 
     @title('[-] Логин пользователя с невалидными данными')
     @mark.parametrize(

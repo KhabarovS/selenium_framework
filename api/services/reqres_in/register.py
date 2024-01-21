@@ -1,8 +1,5 @@
-from typing import Optional
-
-from requests import Response
-
 from api.custom_request import MethodEnum
+from api.custom_response import CustomResponse
 from api.services.reqres_in.reqres_in import ReqresIn
 
 
@@ -13,7 +10,7 @@ class ReqresRegister(ReqresIn):
         super().__init__()
         self.url = f'{self.url}/register'
 
-    def post_register(self, data: Optional[str] = None, json: Optional[dict] = None) -> Response:
+    def post_register(self, data: str | None = None, json: dict | None = None) -> CustomResponse:
         """ Отправить запрос на регистрацию
 
         Args:
