@@ -13,7 +13,7 @@ class ChromeConfig:
         '--ignore-certificate-errors',
         '--disable-gpu',
         '--no-sandbox',
-        'lang=ru'
+        'lang=ru',
     ]
 
 
@@ -26,11 +26,11 @@ class SelenoidConfig:
     CAPABILITIES = {
         'chrome': {
             'browserName': 'chrome',
-            'browserVersion': '86.0',
+            'browserVersion': '119.0',
 
             OPTIONS: {
                 'enableVNC': True,
-                'enableVideo': False
+                'enableVideo': False,
             }
         },
     }

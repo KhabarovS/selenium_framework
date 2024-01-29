@@ -17,7 +17,7 @@ class Driver:
     def __create_chrome_driver(
             root: Path,
             add_opts: Optional[list] = None,
-            is_selenoid: Optional[bool] = None
+            is_selenoid: Optional[bool] = None,
     ) -> Union[Remote, Chrome]:
         """Создать экземпляр Chrome драйвера
 
@@ -31,11 +31,13 @@ class Driver:
         for arg in ChromeConfig.default_options + add_opts:
             options.add_argument(arg)
 
+        for name, opt in SelenoidConfig.CAPABILITIES['chrome'].items():
+            options.set_capability(name, opt)
+
         if is_selenoid:
             return Remote(
                 command_executor=SelenoidConfig.HUB_URL,
-                desired_capabilities=SelenoidConfig.CAPABILITIES['chrome'],
-                options=options
+                options=options,
             )
 
         else:
