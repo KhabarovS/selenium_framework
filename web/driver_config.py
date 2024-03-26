@@ -19,16 +19,15 @@ class ChromeConfig:
 
 class SelenoidConfig:
     """Класс для хранения конфигурации Selenoid."""
-    HUB_URL = "localhost:4444/wd/hub"
-    CLIPBOARD_URL = "localhost:8080/ws/clipboard/"
-    DOWNLOAD_URL = "localhost:4444/download/"
-    OPTIONS = 'selenoid:options'
+    HUB_URL = "http://localhost:4444/wd/hub"
+    CLIPBOARD_URL = "http://localhost:8080/ws/clipboard/"
+    DOWNLOAD_URL = "http://localhost:4444/download/"
     CAPABILITIES = {
         'chrome': {
             'browserName': 'chrome',
             'browserVersion': '119.0',
 
-            OPTIONS: {
+            'selenoid:options': {
                 'enableVNC': True,
                 'enableVideo': False,
             }

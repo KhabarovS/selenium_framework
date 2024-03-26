@@ -21,3 +21,24 @@ loguru = "^0.7.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+
+[tool.pytest.ini_options]
+
+python_classes = ['*Test', 'Test*', '*Suite']
+python_files = ['test_*', '*_test', 'check_*']
+python_functions = ['test_*',  'check_*']
+addopts = [
+    '-v',
+    '-rfExXs',
+    '--disable-warnings',
+    '--tb=short',
+    '--alluredir=allure_reports',
+    '--log_level=DEBUG',
+    '--web_url='
+]
+markers = [
+    'web: запуск web тестов',
+    'api: запуск api тестов'
+]
