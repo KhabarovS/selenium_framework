@@ -158,7 +158,7 @@ class CustomResponse:
         if not self.json():
             raise AttributeError('Тело ответа отсутствует!')
 
-        result = model_.parse_obj(self._response_body)
+        result = model_(**self._response_body)
 
         logger.debug('Тело ответа успешно преобразовано в dto. Результат: {}', result)
 
@@ -207,61 +207,6 @@ class CustomResponse:
             exception: объект исключения.
         """
         self.__base_check_expected_status_code(expected_code=expected_code, exception=exception)
-
-        return self
-
-    def __base_is_success(self, exception: type[Exception] | None = None, reverse: bool = False):
-        """Проверить success в ответе
-
-        Args:
-            exception: триггер для вызова исключения вместо ассерта;
-            reverse: триггер ожидания false в success.
-        """
-
-        success: bool | None = self.success()
-
-        msg: str = ERROR_SUCCESS_MSG.format(result='false' if reverse else 'true')
-
-        if success is None or type(success) is not bool:
-            raise ValueError(f'Ожидается True/False для проверки success. Фактическое значение: {success}')
-
-        logger.debug(
-            f'Проверить значение в ключе success. Мод: {"Проверка на False" if reverse else "Проверка на True"}'
-        )
-
-        result: bool = not success if reverse else success
-
-        if exception:
-            logger.debug('Выполнение проверки с вызовом исключения')
-
-            if not result:
-                raise exception(msg)
-
-        logger.debug('Выполнение проверки с вызовом ассерта')
-        assert result, msg
-
-        logger.success('Значение success успешно проверено!')
-
-    @step('Проверить(assert) значение в поле success')
-    def assert_is_success(self, reverse: bool = False) -> Self:
-        """ Проверить success в ответе
-
-        Args:
-            reverse: триггер ожидания false в success.
-        """
-        self.__base_is_success(reverse=reverse)
-
-        return self
-
-    @step('Проверить(exception) значение в поле success')
-    def check_is_success(self, exception: type[Exception] = ValueError, reverse: bool = False) -> Self:
-        """ Проверить success в ответе, иначе вызвать исключение
-
-        Args:
-            exception: объект исключения;
-            reverse: триггер ожидания false в success.
-        """
-        self.__base_is_success(exception=exception, reverse=reverse)
 
         return self
 
