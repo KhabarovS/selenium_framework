@@ -15,11 +15,11 @@ class TestCreateUser(AllureApiUsers):
     def test_create_user(self, fixture_delete_user: Annotated[list, fixture]):
         response = ReqresUsers().create_user(json={'name': get_random_name(), 'job': get_random_job()})
 
-        response.check_expected_status_code(expected_code=201)
+        response.assert_status_code(expected_code=201)
 
         fixture_delete_user.append(response.json()['id'])
 
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('[-] Создать пользователя с не валидными параметрами')
     @mark.parametrize(
@@ -37,4 +37,4 @@ class TestCreateUser(AllureApiUsers):
         if str(response.status_code)[0] == '2':
             fixture_delete_user.append(response.json()['id'])
 
-        response.check_expected_status_code(expected_code=400)
+        response.assert_status_code(expected_code=400)

@@ -23,8 +23,8 @@ class TestUpdateUser(AllureApiUsers):
             json={'name': get_random_name()}
         )
 
-        response.check_expected_status_code(expected_code=200)
-        response.check_is_valid()
+        response.assert_status_code(expected_code=200)
+        response.assert_model_valid()
 
     @title('Обновить пользователя')
     def test_put_user(self, fixture_create_user: Annotated[CreateUserDto, fixture]):
@@ -34,5 +34,5 @@ class TestUpdateUser(AllureApiUsers):
             json={'name': get_random_name(), 'job': get_random_job()}
         )
 
-        response.check_expected_status_code(expected_code=200)
-        response.check_is_valid()
+        response.assert_status_code(expected_code=200)
+        response.assert_model_valid()

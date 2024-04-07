@@ -12,4 +12,4 @@ class TestGetResourceList(AllureApiResource):
         response = ReqresUnknown().get_unknown_list()
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()

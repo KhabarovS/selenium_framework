@@ -14,7 +14,7 @@ class TestGetUsersList(AllureApiUsers):
         response = ReqresUsers().get_users(params={'page': page})
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('Получить список пользователей с ожиданием')
     @mark.parametrize('delay', [1, 2, 3])
@@ -22,7 +22,7 @@ class TestGetUsersList(AllureApiUsers):
         response = ReqresUsers().get_users(params={'delay': delay})
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('[-] Получить список с невалидными параметрами')
     @mark.parametrize(
@@ -36,4 +36,4 @@ class TestGetUsersList(AllureApiUsers):
     def test_get_users_list_negative(self, page: str):
         response = ReqresUsers().get_users(params={'page': page})
 
-        response.check_expected_status_code(expected_code=400)
+        response.assert_status_code(expected_code=400)

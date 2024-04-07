@@ -12,4 +12,4 @@ class TestDeleteUser(AllureApiUsers):
     def test_delete_user(self, fixture_create_user: CreateUserDto):
         response = ReqresUsers().delete_user(user_id=fixture_create_user.id_)
 
-        response.check_expected_status_code(expected_code=204)
+        response.assert_status_code(expected_code=204)

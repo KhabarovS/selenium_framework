@@ -19,7 +19,7 @@ class TestLoginUser(AllureApiLogin):
         )
 
         response_obj.raise_for_status()
-        response_obj.check_is_valid()
+        response_obj.assert_model_valid()
 
     @title('[-] Логин пользователя с невалидными данными')
     @mark.parametrize(
@@ -32,6 +32,6 @@ class TestLoginUser(AllureApiLogin):
     def test_login_user_unsuccessful(self, json: dict, msg: str):
         response = ReqresLogin().post_login(json=json, response_model=RegisterResponse)
 
-        response.check_expected_status_code(expected_code=400)
-        response.check_is_valid()
+        response.assert_status_code(expected_code=400)
+        response.assert_model_valid()
         assert msg == response.json()['error']

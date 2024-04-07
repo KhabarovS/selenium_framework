@@ -14,14 +14,14 @@ class TestGetSingleUser(AllureApiUsers):
         response = ReqresUsers().get_single_user(user_id=user_id)
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('Получить пользователя с валидными параметрами NOT FOUND')
     @mark.parametrize('user_id', [23, 55])
     def test_get__user_not_found(self, user_id: int):
         response = ReqresUsers().get_single_user(user_id=user_id)
 
-        response.check_expected_status_code(expected_code=404)
+        response.assert_status_code(expected_code=404)
         assert '{}' == response.text, f'Тело ответа "{response.text}" не соответствует ожидаемому {{}}'
 
     @title('[-] Получить пользователя невалидным идентификатором')
@@ -36,4 +36,4 @@ class TestGetSingleUser(AllureApiUsers):
     def test_get_users_list_negative(self, user_id: int):
         response = ReqresUsers().get_single_user(user_id=user_id)
 
-        response.check_expected_status_code(expected_code=400)
+        response.assert_status_code(expected_code=400)

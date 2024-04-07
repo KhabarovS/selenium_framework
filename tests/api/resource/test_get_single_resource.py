@@ -14,14 +14,14 @@ class TestGetSingleResource(AllureApiResource):
         response = ReqresUnknown().get_single_unknown(resource_id=resource_id)
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('Получить ресурс с валидными параметрами NOT FOUND')
     @mark.parametrize('resource_id', [23, 55])
     def test_get__user_not_found(self, resource_id: int):
         response = ReqresUnknown().get_single_unknown(resource_id=resource_id)
 
-        response.check_expected_status_code(expected_code=404)
+        response.assert_status_code(expected_code=404)
         assert '{}' == response.text, f'Тело ответа "{response.text}" не соответствует ожидаемому {{}}'
 
     @title('[-] Получить ресурс невалидным идентификатором')
@@ -36,4 +36,4 @@ class TestGetSingleResource(AllureApiResource):
     def test_get_users_list_negative(self, resource_id: int):
         response = ReqresUnknown().get_single_unknown(resource_id=resource_id)
 
-        response.check_expected_status_code(expected_code=400)
+        response.assert_status_code(expected_code=400)

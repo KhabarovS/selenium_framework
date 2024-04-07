@@ -21,7 +21,7 @@ class TestRegister(AllureApiRegister):
         response = ReqresRegister().post_register(json={'email': email, 'password': password})
 
         response.raise_for_status()
-        response.check_is_valid()
+        response.assert_model_valid()
 
     @title('[-] Регистрация пользователя с невалидными данными')
     @mark.parametrize(
@@ -34,7 +34,7 @@ class TestRegister(AllureApiRegister):
     def test_register_unsuccessful_user(self, json: dict, msg: str):
         response = ReqresRegister().post_register(json=json)
 
-        response.check_expected_status_code(expected_code=400)
-        response.check_is_valid()
+        response.assert_status_code(expected_code=400)
+        response.assert_model_valid()
 
         assert msg == response.json()['error']
