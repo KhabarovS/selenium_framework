@@ -1,99 +1,290 @@
-from typing import Type, Any
+from typing import Any, Self
 
 from allure import step
 from pydantic import BaseModel
 from requests import Response
+from requests.cookies import RequestsCookieJar
+from requests.structures import CaseInsensitiveDict
+from requests.utils import dict_from_cookiejar
 
+from other.logging import logger
 from other import model
 
+ERROR_SUCCESS_MSG = 'Поле "success" отлично от {result}'
 ERROR_STATUS_CUSTOM_MSG = 'Код статуса ответа {code} не совпадает с ожидаемым: {exp}'
 
 
 class CustomResponse:
-    """Кастомный объект ответа"""
+    """ Класс, расширяющий стандартный Response, поддержкой работы с моделями """
 
-    __slots__ = ['__response', 'request_model', 'response_model', '_response_body']
+    __slots__ = ['response', 'response_model', 'response_error_model', '_response_body']
 
     def __init__(
             self,
             response: Response,
-            request_model: Type[BaseModel] | None = None,
-            response_model: Type[BaseModel] | None = None,
+            response_model: type[BaseModel] | None = None,
+            response_error_model: type[BaseModel] | None = None
     ):
+        """
+
+        Args:
+            response: объект ответа, получаем из запроса через self.request;
+            response_model: основная модель ответа, передается в методе запроса;
+            response_error_model: модель ответа для негативных сценариев, передается в методе запроса.
+        """
+        self.response = response
         self._response_body: dict[str, Any] | None = None
-        self.__response = response
-        self.request_model = request_model
         self.response_model = response_model
+        self.response_error_model = response_error_model
 
     @property
     def status_code(self) -> int:
-        """Получить статус код ответа"""
-        return self.__response.status_code
+        """Вернуть код ответа"""
+
+        logger.debug('Вызов метода status_code из объекта Response')
+        return self.response.status_code
+
+    @property
+    def headers(self) -> CaseInsensitiveDict[str]:
+        """Вернуть заголовки ответов"""
+
+        logger.debug('Вызов метода headers из объекта Response')
+        return self.response.headers
 
     @property
     def content(self) -> bytes:
-        """Получить тело ответа в байт-строке"""
-        return self.__response.content
+        """Вернуть тело в байт-строке"""
+
+        logger.debug('Вызов метода content из объекта Response')
+        return self.response.content
 
     @property
     def text(self) -> str:
         """Вернуть тело в юникод строке"""
-        return self.__response.text
+
+        logger.debug('Вызов метода text из объекта Response')
+        return self.response.text
 
     @property
     def links(self) -> dict[str, Any]:
-        """Получить хедеры ответа в виде словаря"""
-        return self.__response.links
+        """Вернуть хедеры link ответа в виде словаря"""
 
-    @step('Вызвать исключение при неуспешном статус коде(4xx, 5xx)')
+        logger.debug('Вызов метода links из объекта Response')
+        return self.response.links
+
+    @property
+    def cookies(self) -> RequestsCookieJar:
+        """Вернуть cookies ответа в виде RequestsCookieJar"""
+
+        logger.debug('Вызов метода cookies из объекта Response')
+        return self.response.cookies
+
+    @property
+    def cookies_as_dict(self) -> dict[str, Any]:
+        """Вернуть cookies ответа в виде словаря"""
+
+        logger.debug('Получить куки в виде словаря')
+        result = dict_from_cookiejar(self.cookies)
+        logger.success(f'Результат преобразования куков в словарь: {result}')
+
+        return result
+
+    @step('Вызвать исключение при неуспешном статус коде')
     def raise_for_status(self):
-        self.__response.raise_for_status()
+        """Вызвать HTTPError ошибку клиента, если 400 <= статус код < 500
+        или ошибку сервера, если 500 <= статус код < 600
+        """
+
+        logger.debug('Вызов метода raise_for_status из объекта Response')
+        self.response.raise_for_status()
 
     @step('Получить тело ответа в виде словаря или списка')
-    def json(self, **kwargs) -> dict[str, Any] | list[dict[str, Any]]:
-        """Получить ответ как словарь или список
+    def json(self, **kwargs) -> dict[str, Any] | list[dict[str, Any]] | None:
+        """Вернуть весь ответ как dict/list
 
         Args:
-            **kwargs: кварги для преобразования .json()
+            **kwargs: кварги для парса json.
         """
-        if not hasattr(self, '__response_body'):
-            self._response_body = self.__response.json(**kwargs) if self.content and len(self.content) > 0 else None
+
+        logger.debug('Получить тело ответа в виде объекта python')
+
+        if self._response_body is None:
+            logger.debug('Тело не записано внутри экземпляра. Парс тела из ответа Response')
+
+            if self.response.content and len(self.response.content) > 3:
+                self._response_body = self.response.json(**kwargs)
+
+            logger.debug('Результат: {}. Тело записано в экземпляр', self._response_body)
+
+        else:
+            logger.debug('Тело уже записано внутри экземпляра. Возвращаем тело из экземпляра')
 
         return self._response_body
 
+    @step('Получить значение поля success')
+    def success(self) -> bool | None:
+        """Получить success из ответа"""
+
+        result: bool | None = None
+
+        if body := self.json():
+
+            if isinstance(body, dict):
+                result = body.get('success')
+                logger.debug('Получаем значение из ключа success. Полученное значение {}', result)
+
+            else:
+                logger.warning(
+                    'Тело ответа не является словарем. Невозможно получить success! Тип тела ответа: {}', type(body)
+                )
+        else:
+            logger.warning('Отсутствует тело ответа. Невозможно получить success!')
+
+        return result
+
     @step('Преобразовать ответ в dto')
-    def dto(self, **kwargs) -> BaseModel:
-        """Получить ответ как data transfer object
+    def dto(self, is_error_model: bool = False) -> BaseModel:
+        """Вернуть ответ как data transfer object
 
         Args:
-            **kwargs: кварги для преобразования .json()
+            is_error_model: вернуть dto по модели для позитивных или негативных сценариев.
         """
-        if not self.response_model:
-            raise AttributeError('Модель не задана')
 
-        body = self._response_body if self._response_body else self.json(**kwargs)
+        model_ = self.response_error_model if is_error_model else self.response_model
 
-        if body is None:
-            raise ValueError('Невозможно преобразовать ответ в модель! Отсутствует тело ответа')
+        if not model_:
+            raise AttributeError(f'{"" if is_error_model else "Негативная "}Модель не задана!')
 
-        return self.response_model(**body)
+        if not self.json():
+            raise AttributeError('Тело ответа отсутствует!')
 
-    @step('Проверить статус код')
-    def check_expected_status_code(self, expected_code: int, exception: Type[Exception] | None = None):
+        result = model_.parse_obj(self._response_body)
+
+        logger.debug('Тело ответа успешно преобразовано в dto. Результат: {}', result)
+
+        return result
+
+    @step('Проверить статус кода ответа')
+    def __base_check_expected_status_code(self, expected_code: int, exception: type[Exception] | None = None):
         """Проверить статус код
 
         Args:
-            expected_code: ожидаемый статус код
-            exception: вызов исключения, вместо ассерта
+            expected_code: ожидаемый статус код;
+            exception: вызов исключения, вместо ассерта.
         """
+
         msg = ERROR_STATUS_CUSTOM_MSG.format(code=self.status_code, exp=expected_code)
 
-        if exception and self.status_code != expected_code:
-            raise exception(msg)
+        if exception:
+            logger.debug('Выполнение проверки статус кодов с вызовом исключения')
+
+            if self.status_code != expected_code:
+                raise exception(msg)
+
+        logger.debug('Выполнение проверки статус кодов с вызовом ассерта')
 
         assert self.status_code == expected_code, msg
 
-    @step('Валидировать ответ по схеме')
-    def check_is_valid(self):
-        """ Валидировать ответ по схеме"""
-        model.is_valid(model=self.response_model, response=self.json())
+        logger.success('Статус код успешно проверен!')
+
+    @step('Проверить(assert) статус кода ответа')
+    def assert_status_code(self, expected_code: int = 200) -> Self:
+        """Проверить статус код с ожидаемым значением
+
+        Args:
+            expected_code: ожидаемый статус код.
+        """
+        self.__base_check_expected_status_code(expected_code=expected_code)
+
+        return self
+
+    @step('Проверить(exception) статус кода ответа')
+    def check_status_code(self, expected_code: int = 200, exception: type[Exception] = ValueError) -> Self:
+        """Проверить статус код с ожидаемым значением, иначе вызов исключения
+
+        Args:
+            expected_code: ожидаемый статус код;
+            exception: объект исключения.
+        """
+        self.__base_check_expected_status_code(expected_code=expected_code, exception=exception)
+
+        return self
+
+    def __base_is_success(self, exception: type[Exception] | None = None, reverse: bool = False):
+        """Проверить success в ответе
+
+        Args:
+            exception: триггер для вызова исключения вместо ассерта;
+            reverse: триггер ожидания false в success.
+        """
+
+        success: bool | None = self.success()
+
+        msg: str = ERROR_SUCCESS_MSG.format(result='false' if reverse else 'true')
+
+        if success is None or type(success) is not bool:
+            raise ValueError(f'Ожидается True/False для проверки success. Фактическое значение: {success}')
+
+        logger.debug(
+            f'Проверить значение в ключе success. Мод: {"Проверка на False" if reverse else "Проверка на True"}'
+        )
+
+        result: bool = not success if reverse else success
+
+        if exception:
+            logger.debug('Выполнение проверки с вызовом исключения')
+
+            if not result:
+                raise exception(msg)
+
+        logger.debug('Выполнение проверки с вызовом ассерта')
+        assert result, msg
+
+        logger.success('Значение success успешно проверено!')
+
+    @step('Проверить(assert) значение в поле success')
+    def assert_is_success(self, reverse: bool = False) -> Self:
+        """ Проверить success в ответе
+
+        Args:
+            reverse: триггер ожидания false в success.
+        """
+        self.__base_is_success(reverse=reverse)
+
+        return self
+
+    @step('Проверить(exception) значение в поле success')
+    def check_is_success(self, exception: type[Exception] = ValueError, reverse: bool = False) -> Self:
+        """ Проверить success в ответе, иначе вызвать исключение
+
+        Args:
+            exception: объект исключения;
+            reverse: триггер ожидания false в success.
+        """
+        self.__base_is_success(exception=exception, reverse=reverse)
+
+        return self
+
+    def assert_model_valid(self, expected_model: type[BaseModel] | None = None, is_error_model: bool = False):
+        """Валидировать схему ответа
+
+        Args:
+            expected_model: ожидаемая модель;
+            is_error_model: проверять ответ по схеме для позитивных или негативных сценариев.
+        """
+
+        logger.debug('Выполнение валидации схемы модели с телом ответа')
+
+        if (body_ := self.json()) is None:
+            raise AttributeError('Тело ответа отсутствует.')
+
+        inst_model = self.response_error_model if is_error_model else self.response_model
+
+        model_ = expected_model if expected_model else inst_model
+
+        if model_ is None:
+            raise AttributeError(f'Отсутствует {"негативная " if is_error_model else ""}модель для валидации!')
+
+        model.is_valid(model=model_, response=body_)
+
+        logger.success('Тело ответа успешно проверено по схеме!')

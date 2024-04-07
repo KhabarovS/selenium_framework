@@ -31,8 +31,8 @@ class Request:
             params: dict[str, Any] | None = None,
             timeout: int | float | None = None,
             json: dict | list | BaseModel | None = None,
-            request_model: Type[BaseModel] | None = None,
             response_model: Type[BaseModel] | None = None,
+            response_error_model: Type[BaseModel] | None = None,
             **kwargs,
     ) -> CustomResponse:
         """Отправить запрос и залогировать запрос и ответ
@@ -45,8 +45,8 @@ class Request:
             json: тело запроса в формате dict
             params: параметры запроса, если есть
             timeout: таймаут, который надо выждать прежде чем отправить запрос
-            request_model: Схема запроса
             response_model: Схема ответа
+            response_error_model: схема ответа для негативных сценариев
             **kwargs: кварги для метода преобразования объекта модели
         """
         if isinstance(data := data if data else self.data, BaseModel):
@@ -78,4 +78,8 @@ class Request:
         )
         log_response(response=response)
 
-        return CustomResponse(response=response, request_model=request_model, response_model=response_model)
+        return CustomResponse(
+            response=response,
+            response_model=response_model,
+            response_error_model=response_error_model
+        )
