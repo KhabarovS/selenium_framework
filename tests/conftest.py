@@ -6,7 +6,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from other.logging import logger
 
 
-@fixture
+@fixture(scope='session')
 @title('Открыть страницу')
 def open_page(request: SubRequest, driver: WebDriver) -> WebDriver:
     """Открыть вебдрайвер и страницу.

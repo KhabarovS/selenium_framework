@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 from _pytest.fixtures import SubRequest
+from _pytest.python import Function
 from _pytest.reports import TestReport
 from _pytest.runner import CallInfo
 from allure import attach, attachment_type, step, title
@@ -66,7 +67,7 @@ def pytest_configure(config: pytest.Config):
     Config.web_url = config.getoption('--web_url')
 
 
-@pytest.fixture(scope='module', params=[()])
+@pytest.fixture(scope='session', params=[()])
 @title('Инициализировать драйвер с параметрами')
 def driver(request: SubRequest):
     """Инициализировать экземпляр драйвера
@@ -95,7 +96,7 @@ def driver(request: SubRequest):
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item: Function, call: CallInfo):  # noqa
+def pytest_runtest_makereport(item: Function, call: CallInfo): # noqa
     """Хук для сохранения скриншота при падении
 
     Args:
@@ -110,7 +111,7 @@ def pytest_runtest_makereport(item: Function, call: CallInfo):  # noqa
 
     if (
             rep.when == 'call'
-            and any(map(lambda x: x in item.fixturename, ['driver', 'open_page']))
+            and any(map(lambda x: x in item.fixturenames, ['driver', 'open_page']))
             and rep.failed
     ):
 
