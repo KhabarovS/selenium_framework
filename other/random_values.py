@@ -1,7 +1,6 @@
 from enum import Enum
 from random import randint
 from string import ascii_lowercase, digits
-from typing import Optional
 
 from allure import step
 from mimesis import Person, Locale
@@ -20,7 +19,7 @@ class NameEnum(Enum):
 
 
 @step('Генератор. Получить случайное число')
-def get_random_number(start: int = 1, end: int = 999999, length: Optional[int] = None) -> int:
+def get_random_number(start: int = 1, end: int = 999999, length: int | None = None) -> int:
     """ Получить случайное число в заданном диапазоне или заданной длины
 
     Args:

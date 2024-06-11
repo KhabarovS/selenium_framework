@@ -90,13 +90,15 @@ class CustomResponse:
         return result
 
     @step('Вызвать исключение при неуспешном статус коде')
-    def raise_for_status(self):
+    def raise_for_status(self) -> Self:
         """Вызвать HTTPError ошибку клиента, если 400 <= статус код < 500
         или ошибку сервера, если 500 <= статус код < 600
         """
 
         logger.debug('Вызов метода raise_for_status из объекта Response')
         self.response.raise_for_status()
+
+        return self
 
     @step('Получить тело ответа в виде словаря или списка')
     def json(self, **kwargs) -> dict[str, Any] | list[dict[str, Any]] | None:

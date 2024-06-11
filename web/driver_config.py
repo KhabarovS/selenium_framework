@@ -27,9 +27,6 @@ class SelenoidConfig:
             'browserName': 'chrome',
             'browserVersion': '119.0',
 
-            'selenoid:options': {
-                'enableVNC': True,
-                'enableVideo': False,
-            }
+            'selenoid:options': {'enableVNC': True, 'enableVideo': False}
         },
     }

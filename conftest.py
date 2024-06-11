@@ -2,7 +2,9 @@ from pathlib import Path
 
 import pytest
 from _pytest.fixtures import SubRequest
-from allure import step, title
+from _pytest.reports import TestReport
+from _pytest.runner import CallInfo
+from allure import attach, attachment_type, step, title
 
 from other.config import Config
 from other.logging import create_logger, logger
@@ -10,7 +12,7 @@ from web.driver_factory import Driver
 
 
 def pytest_addoption(parser: pytest.Parser):
-    """Парсер для аргументов командной строки и значений ini-файла.
+    """Парсер для аргументов командной строки.
 
     Args:
         parser: Инстанс Parser.
@@ -20,7 +22,7 @@ def pytest_addoption(parser: pytest.Parser):
         action="store",
         default="chrome",
         help="Браузер",
-        choices=['chrome', 'yandex']
+        choices=['chrome']
     )
 
     parser.addoption(
@@ -30,9 +32,9 @@ def pytest_addoption(parser: pytest.Parser):
     )
 
     parser.addoption(
-        "--selenoid",
+        "--remote",
         action="store_true",
-        help="Укажите параметр, если хотите запустить браузер через Selenoid"
+        help="Укажите параметр, если хотите запустить удаленный браузер"
     )
 
     parser.addoption(
@@ -58,59 +60,28 @@ def pytest_configure(config: pytest.Config):
     Config.log_level = config.getoption('--log_level')
     create_logger(log_level=Config.log_level)
 
+    Config.is_remote = config.getoption('--remote')
+    Config.is_headless = config.getoption('--headless')
+    Config.browser = config.getoption('--browser')
     Config.web_url = config.getoption('--web_url')
-
-
-@pytest.fixture(scope='session')
-@title('Получить флаг запуска браузера в безоконном режиме')
-def is_headless(request: SubRequest) -> bool:
-    """Получить настройку "без окна" из параметров запуска, используется только для локального запуска!
-
-    Args:
-        request: Подзапрос для получения данных из тестовой функции/фикстуры.
-    """
-    return bool(request.config.getoption('--headless'))
-
-
-@pytest.fixture(scope='session')
-@title('Получить флаг запуска в SELENOID')
-def is_selenoid(request: SubRequest) -> bool:
-    """Получить настройку "Selenoid" из параметров запуска, используется для прогона с использованием SELENOID
-
-    Args:
-        request: Подзапрос для получения данных из тестовой функции/фикстуры.
-    """
-    return bool(request.config.getoption('--selenoid'))
-
-
-@pytest.fixture(scope='session')
-@title('Получить название браузера')
-def browser_name(request: SubRequest) -> str:
-    """Получить название браузера из параметров запуска
-
-    Args:
-        request: Подзапрос для получения данных из тестовой функции/фикстуры.
-    """
-    return request.config.getoption('--browser')
 
 
 @pytest.fixture(scope='module', params=[()])
 @title('Инициализировать драйвер с параметрами')
-def driver(request: SubRequest, is_selenoid, browser_name):
+def driver(request: SubRequest):
     """Инициализировать экземпляр драйвера
 
     Args:
         request: Подзапрос для получения данных из тестовой функции/фикстуры
-        browser_name: Фикстура, имя браузера для прогона
-        is_selenoid: Фикстура, Параметр запуска на удалённом сервере Selenoid
     """
 
-    with step(f'Создать инстанс браузера {browser_name}, Selenoid={is_selenoid}'):
+    with step(f'Создать экземпляр браузера {Config.browser}, Remote={Config.is_remote}'):
         Config.driver = Driver.get_driver(
             root=Path(request.config.rootpath),
-            browser_name=browser_name,
+            browser_name=Config.browser,
             add_opts=[option for option in request.param],
-            is_selenoid=is_selenoid
+            is_remote=Config.is_remote,
+            is_headless=Config.is_headless,
         )
 
     yield Config.driver
@@ -119,5 +90,38 @@ def driver(request: SubRequest, is_selenoid, browser_name):
         Config.driver.quit()
         logger.info('Сессия драйвера закрыта!')
 
-    except Exception:
+    except TimeoutError:
         logger.warning('Сессия закрылась по таймауту!')
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item: Function, call: CallInfo):  # noqa
+    """Хук для сохранения скриншота при падении
+
+    Args:
+        item: выполненный тест
+        call: объект с информацией о вызове функции
+
+    Returns:
+
+    """
+    outcome = yield
+    rep: TestReport = outcome.get_result()
+
+    if (
+            rep.when == 'call'
+            and any(map(lambda x: x in item.fixturename, ['driver', 'open_page']))
+            and rep.failed
+    ):
+
+        try:
+            logger.info(f'Сохранить скриншот при падении теста: {rep.nodeid}')
+            attach(
+                name=f'screenshot_{rep.nodeid}',
+                body=Config.driver.get_screenshot_as_png(),
+                attacment_type=attachment_type.PNG
+            )
+            logger.info(f'Скриншот успешно сохранен')
+
+        except Exception:
+            logger.warning('Не удалось сохранить скриншот')

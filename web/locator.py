@@ -49,8 +49,8 @@ class Locator:
         """
 
         Args:
-            name:
-            locator:
+            name: имя локатора
+            locator: локатор
         """
         self.name = name
         self.locator = locator
@@ -59,7 +59,7 @@ class Locator:
         return self.locator[1] + other
 
     def __repr__(self) -> str:
-        return f'Locator({self.name=}, {self.locator=})'
+        return f'{self.__class__.__name__}({self.name=}, {self.locator=})'
 
     def __str__(self) -> str:
         return f'Элемент "{self.name}" с локатором "{self.locator}"'

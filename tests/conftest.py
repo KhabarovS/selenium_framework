@@ -1,5 +1,3 @@
-from typing import Iterable
-
 from _pytest.fixtures import SubRequest
 from allure import step, title
 from pytest import fixture
@@ -10,7 +8,7 @@ from other.logging import logger
 
 @fixture
 @title('Открыть страницу')
-def open_page(request: SubRequest, driver: WebDriver):
+def open_page(request: SubRequest, driver: WebDriver) -> WebDriver:
     """Открыть вебдрайвер и страницу.
 
     Args:

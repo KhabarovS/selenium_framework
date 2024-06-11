@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Optional, Union
 
 from selenium.webdriver import Chrome, Remote
 from selenium.webdriver.chrome.options import Options as ChromeOptions
@@ -16,15 +15,16 @@ class Driver:
     @staticmethod
     def __create_chrome_driver(
             root: Path,
-            add_opts: Optional[list] = None,
-            is_selenoid: Optional[bool] = None,
-    ) -> Union[Remote, Chrome]:
+            is_remote: bool,
+            is_headless: bool,
+            add_opts: list[str] | None = None
+    ) -> Remote | Chrome:
         """Создать экземпляр Chrome драйвера
 
         Args:
             root: корень проекта
             add_opts: дополнительные опции
-            is_selenoid: запуск через Selenoid
+            is_remote: запуск через удаленный браузер
         """
         options = ChromeOptions()
 
@@ -34,7 +34,10 @@ class Driver:
         for name, opt in SelenoidConfig.CAPABILITIES['chrome'].items():
             options.set_capability(name, opt)
 
-        if is_selenoid:
+        if is_headless:
+            options.add_argument("--headless")
+
+        if is_remote:
             return Remote(
                 command_executor=SelenoidConfig.HUB_URL,
                 options=options,
@@ -50,14 +53,16 @@ class Driver:
     def get_driver(
             root: Path,
             browser_name: str,
-            add_opts: Optional[list] = None,
-            is_selenoid: Optional[bool] = None
-    ) -> Union[Remote, Chrome]:
+            is_remote: bool,
+            is_headless: bool,
+            add_opts: list[str] | None = None,
+    ) -> Remote | Chrome:
         """Получить экземпляр драйвера
 
         Args:
             root: путь до корня проекта
-            is_selenoid: запуск через Selenoid
+            is_remote: запуск через удаленный браузер
+            is_headless: запуск в headless режиме
             browser_name: название браузера
             add_opts: дополнительные опции
         """
@@ -65,8 +70,9 @@ class Driver:
             f'Переданы настройки браузера:\n'
             f'\tБраузер:       \t{browser_name}\n'
             f'\tДоп. настройки:\t{add_opts}\n'
-            f'\tSelenoid:      \t{is_selenoid}'
+            f'\tis_remote:      \t{is_remote}'
+            f'\tis_headless:      \t{is_headless}'
         )
         return {
             'chrome': Driver.__create_chrome_driver
-        }[browser_name](root=root, add_opts=add_opts, is_selenoid=is_selenoid)
+        }[browser_name](root=root, add_opts=add_opts, is_remote=is_remote, is_headless=is_headless)

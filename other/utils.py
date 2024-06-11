@@ -1,4 +1,5 @@
 from json import dumps
+from typing import Any
 
 from allure import attach, attachment_type, step
 from jsonpath_rw_ext import parse
@@ -8,23 +9,37 @@ from other.logging import logger
 
 
 @logger.catch
-def get_curl(request: PreparedRequest, is_compressed: bool = False, is_insecure: bool = False):
+def get_curl(
+        request: PreparedRequest,
+        is_compressed: bool = False,
+        is_insecure: bool = False,
+        is_breaks: bool = False
+) -> str:
     """Получить curl запроса
 
     Args:
         request: запрос
-        is_compressed: параметр позволяющий сформировать curl для запроса сжатого ответа
-        is_insecure: параметр явно позволяет сформировать curl для "небезопасного" SSL соединения и передачи данных
+        is_compressed: параметр позволяющий сформировать curl для запроса сжатого ответа;
+        is_insecure: параметр явно позволяет сформировать curl для "небезопасного" SSL соединения и передачи данных;
+        is_breaks: вернуть курл с переносами
     """
-    headers = ' -H '.join([f'"{k}: {v}"' for k, v in request.headers.items()])
-    return f"curl -X {request.method} -H {headers} " \
-           f"-d '{request.body.decode('latin-1') if isinstance(request.body, bytes) else request.body}' " \
-           f"{'--compressed' if is_compressed else ''} " \
-           f"{'--insecure' if is_insecure else ''} '{request.url}"
+    sep = ' ' if not is_breaks else '\n'
+    body = request.body
+
+    curl_attrs = [
+        f'curl -X {request.method}',
+        sep.join([f'-H "{k}: {v}"' for k, v in request.headers.items()]),
+        f'-d "{body.decode("latin-1") if isinstance(body, bytes) else body}"' if body else '',
+        '--compressed ' if is_compressed else '',
+        '--insecure ' if is_insecure else '',
+        request.url
+    ]
+
+    return sep.join([attr for attr in curl_attrs if attr])
 
 
 @step('Поиск значения в словаре')
-def find_value_from_json(json: dict, jp_expr: str) -> str or dict or list or bool or int:
+def find_value_from_json(json: dict[str, Any], jp_expr: str) -> Any:
     """ Найти значение в json по JPExpression
 
     Args:

@@ -1,7 +1,6 @@
 """ Модуль с функциями логгера """
 import sys
 from json import dumps, loads
-from typing import Union
 
 from allure import attach, attachment_type, step
 from loguru import logger
@@ -68,8 +67,9 @@ def set_log_level(log_level: str):
         logger.info(f'Установлен уровень логирования: {Config.log_level}')
 
 
-def attach_body(body: Union[str, bytes]):
+def attach_body(body: str | bytes):
     """Прикрепить в allure тело запроса
+
     Args:
         body: Тело запроса
     """
