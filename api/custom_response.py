@@ -113,8 +113,7 @@ class CustomResponse:
         if self._response_body is None:
             logger.debug('Тело не записано внутри экземпляра. Парс тела из ответа Response')
 
-            if self.response.content and len(self.response.content) > 3:
-                self._response_body = self.response.json(**kwargs)
+            self._response_body = self.response.json(**kwargs)
 
             logger.debug('Результат: {}. Тело записано в экземпляр', self._response_body)
 
