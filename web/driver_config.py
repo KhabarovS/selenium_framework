@@ -13,7 +13,7 @@ class ChromeConfig:
         '--ignore-certificate-errors',
         '--disable-gpu',
         '--no-sandbox',
-        'lang=ru',
+        '--lang=ru-RU',
     ]
 
 
