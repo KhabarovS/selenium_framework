@@ -120,7 +120,7 @@ def pytest_runtest_makereport(item: Function, call: CallInfo): # noqa
             attach(
                 name=f'screenshot_{rep.nodeid}',
                 body=Config.driver.get_screenshot_as_png(),
-                attacment_type=attachment_type.PNG
+                attachment_type=attachment_type.PNG
             )
             logger.info(f'Скриншот успешно сохранен')
 
